@@ -33,9 +33,9 @@ def getSensorValues(board):
         boardScore += chess_piece_values[symbol]
     sensorValues['B'] = boardScore
     if board.is_check():
-        sensorValues['C'] = 50
+        sensorValues['H'] = 50
     else:
-        sensorValues['C'] = 0
+        sensorValues['H'] = 0
     if board.is_checkmate():
         sensorValues['M'] = 50
     else:
@@ -57,9 +57,9 @@ def getSensorValues(board):
 
 #=========GP Tree stuff=========
 #lists with the functions for easy sampling
-leafFunctions = ['B', 'C', 'M', 'S', 'A']
+leafFunctions = ['B', 'C', 'M', 'S', 'A', 'H']
 nonLeafFunctions = ['+', '-', '*', '/', 'RAND']
-functions = ['B', 'C', 'M', 'S', 'A', '+', '-', '*', '/', 'RAND']
+functions = ['B', 'C', 'M', 'S', 'A', 'H', '+', '-', '*', '/', 'RAND']
 
 #node class
 class GPNode:
@@ -79,12 +79,16 @@ class GPNode:
         for depthLevel in range(self.depth):
             outString += '|'
         outString += str(self.function)
-        if not(self.isLeaf):
+        if self.function in nonLeafFunctions:
             outString += '\n' + self.left.toString() + '\n' + self.right.toString()
         return outString
         
 	#get score recursively
     def getScore(self, sensorValues):
+        try:
+            self.function = float(self.function)
+        except:
+            a = 0
         if self.function in sensorValues:
             return sensorValues[self.function]
         if isinstance(self.function, float) or isinstance(self.function, int):
@@ -165,7 +169,6 @@ def lineToGPNode(lines):
         return node
         
 def fileToGPTree(treeFile):
-    treeFile = './solutions/solution.txt'
     treeText = open(treeFile)
     treeLines = treeText.readlines()
     for lineIndex in range(len(treeLines)):
@@ -385,14 +388,14 @@ def run(configFile = "./configs/default.cfg"):
         config["randomSeed"] = int(config["randomSeed"])
     random.seed(config["randomSeed"])
     
-    bestFitnessEver = -1
+    bestFitnessEver = -10000
     bestEverWorldString = ""
     bestEverTreeString = ""
     
     for run in range(1, int(config["runs"]) + 1):
         runLogText += "\n\nRun " + str(run)
         numEvaluations = 0  
-        bestFitnessRun = -1
+        bestFitnessRun = -10000
         print("Run: ", run)
         
         #Get parents using ramped half and half
@@ -455,10 +458,10 @@ def run(configFile = "./configs/default.cfg"):
     
         
     
-
-if len(sys.argv) > 1:
-    run(sys.argv[1])
-else:
-    #cProfile.run('run()')
-    run()  
+def main():
+    if len(sys.argv) > 1:
+        run(sys.argv[1])
+    else:
+        #cProfile.run('run()')
+        run()  
        

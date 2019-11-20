@@ -21,6 +21,7 @@ def play(player1: Player, player2: Player):
             break
 
         # move black
+        board = board.mirror()
         possible_moves = get_legal_moves(board.legal_moves)
         p2Move = player2.choose_move(board, possible_moves)
         board.push(p2Move)
@@ -29,7 +30,10 @@ def play(player1: Player, player2: Player):
 
         # check if game is over by p2's move
         if board.is_game_over():
+            board = board.mirror()
             break
+        
+        board = board.mirror()
 
     gec = get_game_ending_condition(board)
     return board
