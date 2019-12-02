@@ -1,0 +1,31 @@
+{
+	"opponent":"stockfish",
+	"numberOfParents":25,
+	"numberOfChildren":25,
+	"mutationChance":".05",
+	"parentSelection":
+		{
+			"mode":"o",
+			"overSelectionCutoff":".2"
+		},
+	"survivorSelection":
+		{
+			"mode":"t",
+			"k":5
+		},
+	"runs":"1",
+	"terminationConditions":
+		{
+			"mode":"e",
+			"n":"2000"
+		},
+	"penaltyCoefficient":".1",
+	"pillDensity":".5",
+	"fruitSpawnChance":"1",
+	"fruitScore":10,
+	"timeMultiplier":3,
+	"randomSeed":"",
+	"logFilePath":"./logs/stockfishlog.txt",
+	"solutionFilePath":"./solutions/stockfishsolution.txt",
+	"maxTreeDepth":3
+}

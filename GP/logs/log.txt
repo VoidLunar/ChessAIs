@@ -1,0 +1,47 @@
+Result Log
+{
+	"opponent":"random",
+	"numberOfParents":25,
+	"numberOfChildren":25,
+	"mutationChance":".05",
+	"parentSelection":
+		{
+			"mode":"o",
+			"overSelectionCutoff":".2"
+		},
+	"survivorSelection":
+		{
+			"mode":"t",
+			"k":5
+		},
+	"runs":"1",
+	"terminationConditions":
+		{
+			"mode":"e",
+			"n":"300"
+		},
+	"penaltyCoefficient":".1",
+	"pillDensity":".5",
+	"fruitSpawnChance":"1",
+	"fruitScore":10,
+	"timeMultiplier":3,
+	"randomSeed":"",
+	"logFilePath":"./logs/log.txt",
+	"bestWorldFilePath":"./worlds/world.txt",
+	"solutionFilePath":"./solutions/solution.txt",
+	"maxTreeDepth":3
+}
+Time in microseconds: 1574129632272854
+
+Run 1
+50	-12.66	103
+75	21.2	103
+100	25.86	126
+125	57.7	141
+150	62.8	162
+175	80.26	162
+200	90.94	162
+225	90.3	162
+250	98.26	166
+275	107.74	170
+300	106.72	170
