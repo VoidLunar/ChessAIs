@@ -14,7 +14,7 @@ class Game:
     def __init__(self):
         self.gameState = GameState()
         self.grid_shape = (8, 8)
-        self.input_shape = (32, 8, 8) #12 * t + 8
+        self.input_shape = (56, 8, 8) #12 * t + 8
         self.name = 'chess'
         self.state_size = 7.7 * (10 ** 45)
         self.action_size = 8*8*73
@@ -39,7 +39,7 @@ class Game:
 class GameState():
     def __init__(self, board=None, playerTurn=1):
         self.board = chess.Board()
-        self.t = 2
+        self.t = 4
         # board dimension (8x8) and
         # t history of black,white position for each player \
         # plus 1 layer for current player's turn,

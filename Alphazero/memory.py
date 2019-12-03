@@ -11,10 +11,11 @@ class Memory:
 		self.ltmemory = deque(maxlen=config.MEMORY_SIZE)
 		self.stmemory = deque(maxlen=config.MEMORY_SIZE)
 
-	def commit_stmemory(self, identities, state, actionValues):
+	def commit_stmemory(self, identities, state, actionValues, policyIndex=None):
 		for r in identities(state, actionValues):
 			self.stmemory.append({
 				'board': copy.deepcopy(r[0].board)
+				, 'policyIndex': policyIndex
 				, 'state': r[0]
 				, 'id': r[0].id
 				, 'AV': r[1]

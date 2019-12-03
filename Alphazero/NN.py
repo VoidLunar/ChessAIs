@@ -18,17 +18,18 @@ from GP.Player import Player
 def nnMove(state, agent, tau=0):
     value, pi, allowedActions = agent.get_preds(state)
     probs = pi[allowedActions]
+    #deterministic
     if tau == 0:
         # take max probability
         actions = np.argwhere(probs == max(probs))
         moveIndex = random.choice(actions)[0]
+    #random
     else:
-        action_idx = np.random.multinomial(1, probs)
-        moveIndex = np.where(action_idx == 1)[0][0]
+        moveIndex = random.randint(0, len(probs)-1)
     lms = get_legal_moves(state.board.legal_moves)
     move = lms[moveIndex]
-
-    return move, value, pi
+    policyIndex = allowedActions[moveIndex]
+    return move, value, pi, policyIndex
 
 def train(player1: Player, player2: Player, numEpisode):
     for episode in range(numEpisode):
@@ -36,20 +37,24 @@ def train(player1: Player, player2: Player, numEpisode):
         board = chess.Board()
         memory.clear_stmemory()
         env.gameState.get_board(board)
+
         values = []
         while True:
             capture = False
             value = 0
             # move white
+            if len(board.move_stack) % 30 == 0:
+                print("board at move:", len(board.move_stack))
+                print(board)
             possible_moves = get_legal_moves(board.legal_moves)
             if len(board.move_stack) < config.TURNS_UNTIL_TAU0:
-                p1Move, value, probs = nnMove(env.gameState, player1.agent, 1)
+                p1Move, value, probs, policyIndex = nnMove(env.gameState, player1.agent, 1)
             else:
-                p1Move, value, probs = nnMove(env.gameState, player1.agent, 0)
+                p1Move, value, probs, policyIndex = nnMove(env.gameState, player1.agent, 0)
             board.push(p1Move)
             values.append(value)
             env.gameState.get_board(board)
-            memory.commit_stmemory(copy.deepcopy(env.identities), env.gameState, probs)
+            memory.commit_stmemory(copy.deepcopy(env.identities), env.gameState, probs, policyIndex)
 
             # check if game is over by p1's move
             if board.is_game_over():
@@ -59,13 +64,13 @@ def train(player1: Player, player2: Player, numEpisode):
             # move black
             possible_moves = get_legal_moves(board.legal_moves)
             if len(board.move_stack) < config.TURNS_UNTIL_TAU0:
-                p2Move, value, probs = nnMove(env.gameState, player2.agent, 1)
+                p2Move, value, probs, policyIndex = nnMove(env.gameState, player2.agent, 1)
             else:
-                p2Move, value, probs = nnMove(env.gameState, player2.agent, 0)
+                p2Move, value, probs, policyIndex = nnMove(env.gameState, player2.agent, 0)
             board.push(p2Move)
             values.append(value)
             env.gameState.get_board(board)
-            memory.commit_stmemory(copy.deepcopy(env.identities), env.gameState, probs)
+            memory.commit_stmemory(copy.deepcopy(env.identities), env.gameState, probs, policyIndex)
 
             if board.is_game_over():
                 break
@@ -77,17 +82,27 @@ def train(player1: Player, player2: Player, numEpisode):
                 # loser move value = -1
                 if move['playerTurn'] == env.gameState.playerTurn:
                     move['value'] = -1
+                    # decrease policy probablity of losing move
+                    move['AV'][move['policyIndex']] = move['AV'][move['policyIndex']] - 0.2
+                    if move['AV'][move['policyIndex']] < 0:
+                        move['AV'][move['policyIndex']] = 0
                 # winner move value = 1
                 else:
                     move['value'] = 1
+                    # increase policy probablity of winning move
+                    move['AV'][move['policyIndex']] = move['AV'][move['policyIndex']] + 0.2
+                    if move['AV'][move['policyIndex']] > 1:
+                        move['AV'][move['policyIndex']] = 1
             if env.gameState.board.turn:
                 print("white won")
             else:
                 print("black won")
         else:
             print("draw")
-            for move in memory.stmemory:
-                move['value'] = 0
+            for i in range(0, len(memory.stmemory)):
+                memory.stmemory[i]['value'] = values[i]
+        print("endBoard")
+        print(board)
         memory.commit_ltmemory()
 
         print("Memory length:", len(memory.ltmemory))
@@ -95,7 +110,8 @@ def train(player1: Player, player2: Player, numEpisode):
 
 def compete(player1: Player, player2: Player, numCompeteGames):
     p1score = [0, 0, 0]
-    for numGame in range(0, numCompeteGames):
+    for competeGame in range(0, numCompeteGames):
+        print("Game#", numGame + competeGame + 1)
         draw = False
         board = chess.Board()
         env.gameState.get_board(board)
@@ -104,15 +120,15 @@ def compete(player1: Player, player2: Player, numCompeteGames):
             # move white
             if p1Start:
                 if len(board.move_stack) < config.TURNS_UNTIL_TAU0:
-                    p1Move, value,_ = nnMove(env.gameState, player1.agent, 1)
+                    p1Move, value, _, _ = nnMove(env.gameState, player1.agent, 1)
                 else:
-                    p1Move, value,_ = nnMove(env.gameState, player1.agent, 0)
+                    p1Move, value, _, _ = nnMove(env.gameState, player1.agent, 0)
                 board.push(p1Move)
             else:
                 if len(board.move_stack) < config.TURNS_UNTIL_TAU0:
-                    p2Move, value,_ = nnMove(env.gameState, player2.agent, 1)
+                    p2Move, value, _, _ = nnMove(env.gameState, player2.agent, 1)
                 else:
-                    p2Move, value,_ = nnMove(env.gameState, player2.agent, 0)
+                    p2Move, value, _, _ = nnMove(env.gameState, player2.agent, 0)
                 board.push(p2Move)
             env.gameState.get_board(board)
 
@@ -121,16 +137,16 @@ def compete(player1: Player, player2: Player, numCompeteGames):
             # move black
             if p1Start:
                 if len(board.move_stack) < config.TURNS_UNTIL_TAU0:
-                    p2Move, value,_ = nnMove(env.gameState, player2.agent, 1)
+                    p2Move, value, _, _ = nnMove(env.gameState, player2.agent, 1)
                 else:
-                    p2Move, value,_ = nnMove(env.gameState, player2.agent, 0)
+                    p2Move, value, _, _ = nnMove(env.gameState, player2.agent, 0)
                 board.push(p2Move)
 
             else:
                 if len(board.move_stack) < config.TURNS_UNTIL_TAU0:
-                    p1Move, value,_ = nnMove(env.gameState, player1.agent, 1)
+                    p1Move, value, _, _ = nnMove(env.gameState, player1.agent, 1)
                 else:
-                    p1Move, value,_ = nnMove(env.gameState, player1.agent, 0)
+                    p1Move, value, _, _ = nnMove(env.gameState, player1.agent, 0)
                 board.push(p1Move)
 
             env.gameState.get_board(board)
@@ -182,7 +198,6 @@ while numGame < numGames:
     numGame += config.EPISODES
     # once enough(?) memory is saved. train the current player, and do the tournament with current vs best.
     # if current is better, update the best one and compete with each other again until # of game is met.
-
     if len(memory.ltmemory) >= config.MEMORY_SIZE:
         print("training...")
         a1.replay(memory.ltmemory)
@@ -193,11 +208,17 @@ while numGame < numGames:
         if iteration % 1 == 0:
             pickle.dump(memory, open(run_folder + "memory/memory" + str(iteration).zfill(4) + ".p", "wb"))
         # if p1 won more games, p1 is now new best player.
+        print("win:", p1score[0], "draw:", p1score[1], "lose:", p1score[2])
         if p1score[0] > p1score[2]:
             best_player_version = best_player_version + 1
             best_NN.model.set_weights(current_NN.model.get_weights())
-            best_NN.write(env.name, best_player_version)
-            print("saved")
+            best_NN.write(env.name+"best", best_player_version)
+            print("updated best one saved")
+        else:
+            best_player_version = best_player_version + 1
+            best_NN.model.set_weights(current_NN.model.get_weights())
+            best_NN.write(env.name+"same", best_player_version)
+            print("saved the same one.")
 
     print("Game#", numGame)
 

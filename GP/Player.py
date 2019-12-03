@@ -22,6 +22,8 @@ class Player:
             return chosenMove
         elif self.controller == "custom":
             return self.customFunction(board, moves)
+
+        #neuralnetwork controller. makesure to pass in the agent when declaring the player
         elif self.controller == "nn":
             if not self.isNNSetup:
                 self.state = GameState(board)

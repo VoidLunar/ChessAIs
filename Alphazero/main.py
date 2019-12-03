@@ -53,7 +53,7 @@ best_NN = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, env.input_shape, 
 if initialise.INITIAL_MODEL_VERSION != None:
     best_player_version  = initialise.INITIAL_MODEL_VERSION
     print('LOADING MODEL VERSION ' + str(initialise.INITIAL_MODEL_VERSION) + '...')
-    m_tmp = best_NN.read(env.name, initialise.INITIAL_RUN_NUMBER, best_player_version)
+    m_tmp = best_NN.read('', '', best_player_version)
     current_NN.model.set_weights(m_tmp.get_weights())
     best_NN.model.set_weights(m_tmp.get_weights())
 #otherwise just ensure the weights on the two players are the same
