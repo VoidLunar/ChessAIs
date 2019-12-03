@@ -1,8 +1,7 @@
 import random
 from stockfish import Stockfish
 import chess
-
-from Alphazero.game import GameState
+from Alphazero.game import GameState, chessMoves
 
 
 class Player:
@@ -29,11 +28,53 @@ class Player:
                 self.state = GameState(board)
                 self.isNNSetup = True
             return self.customFunction(self.state, self.agent)
+
         elif self.controller == "az":
             if not self.isNNSetup:
                 self.state = GameState(board)
                 self.isNNSetup = True
-            return self.customFunction(self.state, self.agent)
+            action, _, _, _ = self.customFunction(self.state, self.agent)
+            moveFrom = int(action / len(chessMoves))
+
+            chessMoveIndex = action % len(chessMoves)
+            movedistance = chessMoves[chessMoveIndex]
+
+            isPawn = True if board.piece_at(moveFrom) is not None and str(
+                board.piece_at(moveFrom)).lower() == 'p' else False
+            promo = None
+            # regular promo
+            # promo is int 2 = knight, 3 = bishop, 4 = rook, 5 = queen
+            if isPawn:
+                if [8, 9, 10, 11, 12, 13, 14, 15].count(moveFrom) > 0:
+                    if movedistance == -9 or movedistance == -8 or movedistance == -7:
+                        promo = chess.QUEEN
+                    elif movedistance > 100:
+                        promo = int(movedistance / 100)
+                        if promo == 2:
+                            promo = chess.KNIGHT
+                        elif promo == 3:
+                            promo = chess.BISHOP
+                        else:
+                            promo = chess.ROOK
+                        movedistance = (movedistance % 100) * -1
+
+                elif [48, 49, 50, 51, 52, 53, 54, 55].count(moveFrom) > 0:
+                    if movedistance == 9 or movedistance == 8 or movedistance == 7:
+                        promo = chess.QUEEN
+                    elif movedistance > 100:
+                        promo = int(movedistance / 100)
+                        if promo == 2:
+                            promo = chess.KNIGHT
+                        elif promo == 3:
+                            promo = chess.BISHOP
+                        else:
+                            promo = chess.ROOK
+                        movedistance = movedistance % 100
+            moveTo = moveFrom + movedistance
+            # print("move from =",moveFrom, "move to =", moveTo, "distance =",movedistance)
+            move = chess.Move(moveFrom, moveTo, promo)
+            return move
+
         elif self.controller == "stockfish":
             self.stockfish.set_fen_position(board.fen())
             uciStr = self.stockfish.get_best_move()
