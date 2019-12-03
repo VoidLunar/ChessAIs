@@ -106,36 +106,37 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             # logger.info('====================')
 
             ### Do the action
-            lms = state.allowedActionsReadable
-            legalmoveString = ""
-            for lm in lms:
-                legalmoveString += lm.xboard()+", "
+            # lms = state.allowedActionsReadable
+            # legalmoveString = ""
+            # for lm in lms:
+            #     legalmoveString += lm.xboard()+", "
+            #
+            # legalmoveString += "\n"
 
-            legalmoveString += "\n"
-
-            for lmNum in state.allowedActions:
-                legalmoveString += str(lmNum) + ", "
-            if env.gameState.board.turn:
-                print("White's turn")
-            else:
-                print("Black's turn")
-            print(legalmoveString)
+            # for lmNum in state.allowedActions:
+            #     legalmoveString += str(lmNum) + ", "
+            # if env.gameState.board.turn:
+            #     print("White's turn")
+            # else:
+            #     print("Black's turn")
+            # print(legalmoveString)
             state, value, done, _ = env.step(action) #the value of the newState from the POV of the new playerTurn i.e. -1 if the previous player played a winning move
             if state.board.turn:
                 print("Black's Move: " + str(len(state.board.move_stack)))
             else:
                 print("White's Move  :" + str(len(state.board.move_stack)))
 
-            print(action)
+            # print(action)
             print(state.board.move_stack[len(state.board.move_stack)-1])
+
             print(state.board)
-            print()
 
             env.gameState.render(logger)
 
             if done == 1:
                 gec = get_game_ending_condition(state.board)
                 print(gec)
+                print(state.board)
                 if memory != None:
                     #### If the game is finished, assign the values correctly to the game moves
                     for move in memory.stmemory:

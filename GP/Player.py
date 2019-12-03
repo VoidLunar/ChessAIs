@@ -27,6 +27,12 @@ class Player:
         elif self.controller == "nn":
             if not self.isNNSetup:
                 self.state = GameState(board)
+                self.isNNSetup = True
+            return self.customFunction(self.state, self.agent)
+        elif self.controller == "az":
+            if not self.isNNSetup:
+                self.state = GameState(board)
+                self.isNNSetup = True
             return self.customFunction(self.state, self.agent)
         elif self.controller == "stockfish":
             self.stockfish.set_fen_position(board.fen())

@@ -154,7 +154,7 @@ class GameState():
         self.allowedActions = self._allowedActions()
         self.allowedActionsReadable = self._allowedActionsReadable()
         self.playerTurn = self._getTurn()
-        self.isEndGame = len(self.board.move_stack) > 5 or self.board.is_game_over()  # 269
+        self.isEndGame = len(self.board.move_stack) > 120 or self.board.is_game_over()  # 269
         self.value = self._getValue()
         self.score = self._getScore()
         self.id = self._convertStateToId()
@@ -176,7 +176,7 @@ class GameState():
                     self.bKCastling -= 1
 
     def _convertStateToId(self):
-        id = str(self.board)
+        id = str(self.board)+str(self.playerTurn)
 
         return id
 
@@ -334,8 +334,8 @@ class GameState():
 chessMoves = []
 up = [i*8 for i in range(1, 8)]
 down = [i*-8 for i in range(1, 8)]
-left = [i for i in range(1, 8)]
-right = [-i for i in range(1, 8)]
+left = [-i for i in range(1, 8)]
+right = [i for i in range(1, 8)]
 upLeft = [i*7 for i in range(1, 8)]
 upRight = [i*9 for i in range(1, 8)]
 DownLeft = [i*-9 for i in range(1, 8)]

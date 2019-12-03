@@ -83,14 +83,14 @@ def train(player1: Player, player2: Player, numEpisode):
                 if move['playerTurn'] == env.gameState.playerTurn:
                     move['value'] = -1
                     # decrease policy probablity of losing move
-                    move['AV'][move['policyIndex']] = move['AV'][move['policyIndex']] - 0.2
+                    move['AV'][move['policyIndex']] = move['AV'][move['policyIndex']] - 0.1
                     if move['AV'][move['policyIndex']] < 0:
                         move['AV'][move['policyIndex']] = 0
                 # winner move value = 1
                 else:
                     move['value'] = 1
                     # increase policy probablity of winning move
-                    move['AV'][move['policyIndex']] = move['AV'][move['policyIndex']] + 0.2
+                    move['AV'][move['policyIndex']] = move['AV'][move['policyIndex']] + 0.1
                     if move['AV'][move['policyIndex']] > 1:
                         move['AV'][move['policyIndex']] = 1
             if env.gameState.board.turn:
@@ -169,9 +169,9 @@ def compete(player1: Player, player2: Player, numCompeteGames):
                     p1score[0] += 1
                 else:
                     p1score[2] += 1
-    else:
-        #draw +1
-        p1score[1] += 1
+        else:
+            #draw +1
+            p1score[1] += 1
     return p1score
 
 
