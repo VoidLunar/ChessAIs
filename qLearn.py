@@ -255,33 +255,33 @@ def score(beforeBoard, afterBoard):
         scorePoints = (blackAfterPoints - blackBeforePoints) + (whiteBeforePoints - whiteAfterPoints)
     return scorePoints
 
-def run():
-    if (gameCount < totalGames / 2):
-        p1 = Player()
-        p2 = Player("stockfish")
-    else:
-        p1 = Player("stockfish")
-        p2 = Player()
-    play(p1, p2)
+# def run():
+#     if (gameCount < totalGames / 2):
+#         p1 = Player()
+#         p2 = Player("stockfish")
+#     else:
+#         p1 = Player("stockfish")
+#         p2 = Player()
+#     play(p1, p2)
  
-gecList = [0, 0, 0, 0, 0, 0]
-turnList = []
-gameCount = 0
-while (gameCount < totalGames):
-    run()
-    gameCount += 1
+# gecList = [0, 0, 0, 0, 0, 0]
+# turnList = []
+# gameCount = 0
+# while (gameCount < totalGames):
+#     run()
+#     gameCount += 1
  
  
-moveCount = 0 
-for number in turnList:
-        moveCount += number
-print("Move Count:" + str(moveCount))
-print("Turn List: " + str(turnList))  
-turnList.sort()
-print("Sorted Turn List: " + str(turnList))
-print("QTable Size:" + str(len(qTable)))
-print("[Stockfish wins, AI wins, stalemate, insufficient pieces to end the game, five fold repetition draw, 75 move rule draw]")
-print(str(gecList))
+# moveCount = 0 
+# for number in turnList:
+#         moveCount += number
+# print("Move Count:" + str(moveCount))
+# print("Turn List: " + str(turnList))  
+# turnList.sort()
+# print("Sorted Turn List: " + str(turnList))
+# print("QTable Size:" + str(len(qTable)))
+# print("[Stockfish wins, AI wins, stalemate, insufficient pieces to end the game, five fold repetition draw, 75 move rule draw]")
+# print(str(gecList))
 
 with open('qTable.txt', 'a') as the_file:
     for key, values in qTable.items():
