@@ -2,13 +2,18 @@ import random
 from stockfish import Stockfish
 import chess
 
+from Alphazero.game import GameState
+
+
 class Player:
-    def __init__(self, controller="random", customFunction=None):
+    def __init__(self, controller="random", customFunction=None, agent=None):
         # "random", "gp", "alphazero", "*anyother we're planning to implement"
         self.controller = controller
         self.customFunction = customFunction
         # add any other variables as needed
         self.stockfish = Stockfish('./stockfish-10-win/Windows/stockfish_10_x64.exe')
+        self.isNNSetup = False
+        self.agent = agent
 
     def choose_move(self, board, moves):
         if self.controller == "random":
@@ -17,6 +22,10 @@ class Player:
             return chosenMove
         elif self.controller == "custom":
             return self.customFunction(board, moves)
+        elif self.controller == "nn":
+            if not self.isNNSetup:
+                self.state = GameState(board)
+            return self.customFunction(self.state, self.agent)
         elif self.controller == "stockfish":
             self.stockfish.set_fen_position(board.fen())
             uciStr = self.stockfish.get_best_move()
@@ -42,3 +51,4 @@ class Player:
         else:
             # implement controller's movement choice
             pass
+

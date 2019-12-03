@@ -71,6 +71,3 @@ def run():
     p2 = Player()
     play(p1, p2)
 
-def runAZ():
-   ipynb
-

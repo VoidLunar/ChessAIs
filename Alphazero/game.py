@@ -14,7 +14,7 @@ class Game:
     def __init__(self):
         self.gameState = GameState()
         self.grid_shape = (8, 8)
-        self.input_shape = (32, 8, 8)
+        self.input_shape = (32, 8, 8) #12 * t + 8
         self.name = 'chess'
         self.state_size = 7.7 * (10 ** 45)
         self.action_size = 8*8*73
@@ -26,12 +26,9 @@ class Game:
         return ((next_state, value, done, info))
 
     def identities(self, state, actionValues):
-        identities = [(state, actionValues)]
-
         currentBoard = state.board
         currentAV = actionValues
-
-        identities.append((GameState(currentBoard, state.playerTurn), currentAV))
+        identities = [(GameState(currentBoard, state.playerTurn), currentAV)]
 
         return identities
 
@@ -40,19 +37,8 @@ class Game:
         self.gameState = GameState(board)
 
 class GameState():
-    def __init__(self, board=None, playerTurn='True'):
-        if board is not None:
-            self.board = board
-        else:
-            self.board = chess.Board()
-        self.allowedActions = self._allowedActions()
-        self.allowedActionsReadable = self._allowedActionsReadable()
-        self.playerTurn = self._getTurn()
-        self.isEndGame = len(self.board.move_stack) > 160 or self.board.is_game_over() #269
-        self.value = self._getValue()
-        self.score = self._getScore()
-        self.id = self._convertStateToId()
-
+    def __init__(self, board=None, playerTurn=1):
+        self.board = chess.Board()
         self.t = 2
         # board dimension (8x8) and
         # t history of black,white position for each player \
@@ -165,6 +151,14 @@ class GameState():
 
         self.noProgressCount.fill(board.halfmove_clock)
 
+        self.allowedActions = self._allowedActions()
+        self.allowedActionsReadable = self._allowedActionsReadable()
+        self.playerTurn = self._getTurn()
+        self.isEndGame = len(self.board.move_stack) > 5 or self.board.is_game_over()  # 269
+        self.value = self._getValue()
+        self.score = self._getScore()
+        self.id = self._convertStateToId()
+
     def update_castling(self, board):
         if board.turn:
             if not board.has_queenside_castling_rights(board.turn):
@@ -242,27 +236,13 @@ class GameState():
             if len(move) > 4:
                 promote = move[4]
                 distance = abs(distance)
+                # distance = distance + (promotion(int) * 100)
                 if promote == 'r':
-                    if distance == 8:
-                        distance = 408
-                    elif distance == 7:
-                        distance = 407
-                    else:
-                        distance = 409
+                    distance += 400
                 elif promote == 'n':
-                    if distance == 8:
-                        distance = 208
-                    elif distance == 7:
-                        distance = 207
-                    else:
-                        distance = 209
+                    distance += 200
                 else:
-                    if distance == 8:
-                        distance = 308
-                    elif distance == 7:
-                        distance = 307
-                    else:
-                        distance = 309
+                    distance += 300
             chessmoveindex = chessMoves.index(distance)
             lm.append(moveFrom * len(chessMoves) + chessmoveindex)
         return lm
@@ -280,7 +260,10 @@ class GameState():
         return (0, 0, 0)
 
     def _getTurn(self):
-        return str(self.board.turn)
+        if self.board.turn:
+            return 1
+        else:
+            return -1
 
     def _getScore(self):
         tmp = self.value
@@ -298,22 +281,34 @@ class GameState():
 
         # regular promo
         # promo is int 2 = knight, 3 = bishop, 4 = rook, 5 = queen
-        if [8,9,10,11,12,13,14,15].count() == 1 and isblackPawn:
+        if [8,9,10,11,12,13,14,15].count(moveFrom) > 0 and isblackPawn:
             if movedistance == -9 or movedistance == -8 or movedistance == -7:
-                promo = 5
+                promo = chess.QUEEN
             else:
                 promo = int(movedistance/100)
-                movedistance = -movedistance % 100
+                if promo == 2:
+                    promo = chess.KNIGHT
+                elif promo == 3:
+                    promo = chess.BISHOP
+                else:
+                    promo = chess.ROOK
+                movedistance = movedistance % -100
 
-        elif [48,49,50,51,52,53,54,55].count(moveFrom) == 1 and isWhitePawn:
+        elif [48,49,50,51,52,53,54,55].count(moveFrom) > 0 and isWhitePawn:
             if movedistance == 9 or movedistance == 8 or movedistance == 7:
-                promo = 5
+                promo = chess.QUEEN
             else:
                 promo = int(movedistance / 100)
+                if promo == 2:
+                    promo = chess.KNIGHT
+                elif promo == 3:
+                    promo = chess.BISHOP
+                else:
+                    promo = chess.ROOK
                 movedistance = movedistance % 100
 
         moveTo = moveFrom + movedistance
-
+        # print("move from =",moveFrom, "move to =", moveTo, "distance =",movedistance)
         move = chess.Move(moveFrom, moveTo, promo)
 
         b = copy.deepcopy(self.board)

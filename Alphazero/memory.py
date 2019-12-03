@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 from collections import deque
 
@@ -12,7 +14,7 @@ class Memory:
 	def commit_stmemory(self, identities, state, actionValues):
 		for r in identities(state, actionValues):
 			self.stmemory.append({
-				'board': r[0].board
+				'board': copy.deepcopy(r[0].board)
 				, 'state': r[0]
 				, 'id': r[0].id
 				, 'AV': r[1]

@@ -69,14 +69,14 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             player1Starts = goes_first
 
         if player1Starts == 1:
-            players = {'True':{"agent": player1, "name":player1.name}
-                    , 'False': {"agent": player2, "name":player2.name}
+            players = {1:{"agent": player1, "name":player1.name}
+                    , -1: {"agent": player2, "name":player2.name}
                     }
             logger.info(player1.name + ' plays as White')
             print(player1.name + "is white")
         else:
-            players = {'True':{"agent": player2, "name":player2.name}
-                    , 'False': {"agent": player1, "name":player1.name}
+            players = {1:{"agent": player2, "name":player2.name}
+                    , -1: {"agent": player1, "name":player1.name}
                     }
             logger.info(player2.name + ' plays as White')
             logger.info('--------------')
@@ -89,9 +89,9 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
     
             #### Run the MCTS algo and return an action
             if turn < turns_until_tau0:
-                action, pi, MCTS_value, NN_value = players[str(state.board.turn)]['agent'].act(state, 1)
+                action, pi, MCTS_value, NN_value = players[state.playerTurn]['agent'].act(state, 1)
             else:
-                action, pi, MCTS_value, NN_value = players[str(state.board.turn)]['agent'].act(state, 0)
+                action, pi, MCTS_value, NN_value = players[state.playerTurn]['agent'].act(state, 0)
 
             if memory != None:
                 ####Commit the move to memory
@@ -125,10 +125,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                 print("Black's Move: " + str(len(state.board.move_stack)))
             else:
                 print("White's Move  :" + str(len(state.board.move_stack)))
-            print(state.board.halfmove_clock)
-            if state.board.halfmove_clock >= 100:
-                print("draw")
-                print(str(done))
+
             print(action)
             print(state.board.move_stack[len(state.board.move_stack)-1])
             print(state.board)
@@ -152,16 +149,16 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                 if value == 1:
                     logger.info('%s WINS!', players[state.playerTurn]['name'])
                     scores[players[state.playerTurn]['name']] = scores[players[state.playerTurn]['name']] + 1
-                    if state.playerTurn == 'True':
+                    if state.playerTurn == 1:
                         sp_scores['sp'] = sp_scores['sp'] + 1
                     else:
                         sp_scores['nsp'] = sp_scores['nsp'] + 1
 
                 elif value == -1:
                     logger.info('%s WINS!', players[state.playerTurn]['name'])
-                    scores[players[str(not bool(state.playerTurn))]['name']] = scores[players[str(not bool(state.playerTurn))]['name']] + 1
+                    scores[players[state.playerTurn]['name']] = scores[players[state.playerTurn]['name']] + 1
 
-                    if state.playerTurn == 'True':
+                    if state.playerTurn == 1:
                         sp_scores['nsp'] = sp_scores['nsp'] + 1
                     else:
                         sp_scores['sp'] = sp_scores['sp'] + 1

@@ -57,11 +57,15 @@ class Agent():
 
 		lg.logger_mcts.info('ROOT NODE...%s', self.mcts.root.state.id)
 		self.mcts.root.state.render(lg.logger_mcts)
-		lg.logger_mcts.info('CURRENT PLAYER...%d', self.mcts.root.state.playerTurn)
+		if self.mcts.root.state.playerTurn == 1:
+			lg.logger_mcts.info('CURRENT PLAYER...WHITE')
+		else:
+			lg.logger_mcts.info('CURRENT PLAYER...BLACK')
 
 		##### MOVE THE LEAF NODE
 		leaf, value, done, breadcrumbs = self.mcts.moveToLeaf()
 		leaf.state.render(lg.logger_mcts)
+
 
 		##### EVALUATE THE LEAF NODE
 		value, breadcrumbs = self.evaluateLeaf(leaf, value, done, breadcrumbs)
@@ -133,7 +137,11 @@ class Agent():
 		if done == 0:
 	
 			value, probs, allowedActions = self.get_preds(leaf.state)
-			lg.logger_mcts.info('PREDICTED VALUE FOR %d: %f', leaf.state.playerTurn, value)
+			if leaf.state.playerTurn == 1:
+				lg.logger_mcts.info('PREDICTED VALUE FOR WHITE: %f', value)
+			else:
+				lg.logger_mcts.info('PREDICTED VALUE FOR BLACK: %f', value)
+
 
 			probs = probs[allowedActions]
 
@@ -151,7 +159,10 @@ class Agent():
 				leaf.edges.append((action, newEdge))
 				
 		else:
-			lg.logger_mcts.info('GAME VALUE FOR %d: %f', leaf.playerTurn, value)
+			if leaf.playerTurn:
+				lg.logger_mcts.info('GAME VALUE FOR WHITE: %f', value)
+			else:
+				lg.logger_mcts.info('GAME VALUE FOR BLACK: %f', value)
 
 		return ((value, breadcrumbs))
 
@@ -178,6 +189,7 @@ class Agent():
 			action = np.where(action_idx==1)[0][0]
 
 		value = values[action]
+
 
 		return action, value
 
