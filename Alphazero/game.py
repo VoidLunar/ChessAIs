@@ -275,37 +275,37 @@ class GameState():
         chessMoveIndex = action % len(chessMoves)
         movedistance = chessMoves[chessMoveIndex]
 
-        isblackPawn = True if self.board.piece_at(moveFrom) is not None and self.board.piece_at(moveFrom) == 'p' else False
-        isWhitePawn = True if self.board.piece_at(moveFrom) is not None and self.board.piece_at(moveFrom) == 'P' else False
+        isPawn = True if self.board.piece_at(moveFrom) is not None and str(self.board.piece_at(moveFrom)).lower() == 'p' else False
         promo = None
 
         # regular promo
         # promo is int 2 = knight, 3 = bishop, 4 = rook, 5 = queen
-        if [8,9,10,11,12,13,14,15].count(moveFrom) > 0 and isblackPawn:
-            if movedistance == -9 or movedistance == -8 or movedistance == -7:
-                promo = chess.QUEEN
-            else:
-                promo = int(movedistance/100)
-                if promo == 2:
-                    promo = chess.KNIGHT
-                elif promo == 3:
-                    promo = chess.BISHOP
-                else:
-                    promo = chess.ROOK
-                movedistance = movedistance % -100
+        if isPawn:
+            if [8,9,10,11,12,13,14,15].count(moveFrom) > 0:
+                if movedistance == -9 or movedistance == -8 or movedistance == -7:
+                    promo = chess.QUEEN
+                elif movedistance > 100:
+                    promo = int(movedistance/100)
+                    if promo == 2:
+                        promo = chess.KNIGHT
+                    elif promo == 3:
+                        promo = chess.BISHOP
+                    else:
+                        promo = chess.ROOK
+                    movedistance = (movedistance % 100) * -1
 
-        elif [48,49,50,51,52,53,54,55].count(moveFrom) > 0 and isWhitePawn:
-            if movedistance == 9 or movedistance == 8 or movedistance == 7:
-                promo = chess.QUEEN
-            else:
-                promo = int(movedistance / 100)
-                if promo == 2:
-                    promo = chess.KNIGHT
-                elif promo == 3:
-                    promo = chess.BISHOP
-                else:
-                    promo = chess.ROOK
-                movedistance = movedistance % 100
+            elif [48,49,50,51,52,53,54,55].count(moveFrom) > 0:
+                if movedistance == 9 or movedistance == 8 or movedistance == 7:
+                    promo = chess.QUEEN
+                elif movedistance > 100:
+                    promo = int(movedistance / 100)
+                    if promo == 2:
+                        promo = chess.KNIGHT
+                    elif promo == 3:
+                        promo = chess.BISHOP
+                    else:
+                        promo = chess.ROOK
+                    movedistance = movedistance % 100
 
         moveTo = moveFrom + movedistance
         # print("move from =",moveFrom, "move to =", moveTo, "distance =",movedistance)
