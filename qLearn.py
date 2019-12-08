@@ -3,7 +3,8 @@ import chess
 from Player import Player
 import csv
 
-def getQTable(): #For the analysisVersusFile
+#Creates the qTable by reading from the file
+def getQTable(): 
     importName = 'qTable.csv'
     
     importFile = open(importName, 'rt')
@@ -41,11 +42,13 @@ def pickQChessMove(board, moves):
     
     return chosenMove
 
-totalGames = 10000
+totalGames = 10
+gecList = [0, 0, 0, 0, 0, 0]
+turnList = []
 qTable = dict()
 # player1 = white piece. moves first    (chess.WHITE (TRUE))
 # player2 = black piece                 (chess.BLACK (FALSE))
-def play(player1: Player, player2: Player):
+def playRound(player1: Player, player2: Player, gameCount):
     draw = False
     board = chess.Board()
 
@@ -77,7 +80,6 @@ def play(player1: Player, player2: Player):
                         value = tempHigh
                         chosenMove = move
             p1Move = chosenMove
-            #p1Move = player1.choose_move(board, possible_moves)
             boardBefore = board.copy()
             board.push(p1Move)
     
@@ -91,8 +93,10 @@ def play(player1: Player, player2: Player):
             p2Move = player2.choose_move(board, possible_moves)
             board.push(p2Move)
             
-            scorePoints = score(boardBefore, board)
+            #Determines reward after both moves are made
+            scorePoints = score(boardBefore, board, gameCount)
     
+            #Finds the reward of the next state
             futureState = board.fen()
             tempHigh = 0.0
             futureValue = 0.0
@@ -103,6 +107,7 @@ def play(player1: Player, player2: Player):
                     if (value > tempHigh):
                         futureValue = value
             
+            #Updates the qTable reward
             newValue = moveDict[p1Move] + 0.7 * (scorePoints + 0.99 * futureValue - moveDict[p1Move])
             qTable[currentState][p1Move] = newValue
         else: #QLearn is Black
@@ -141,11 +146,12 @@ def play(player1: Player, player2: Player):
                         value = tempHigh
                         chosenMove = move
             p2Move = chosenMove
-            #p2Move = player2.choose_move(board, possible_moves)
             board.push(p2Move)
     
-            scorePoints = score(boardBefore, board)
+            #Determines reward after both moves are made
+            scorePoints = score(boardBefore, board, gameCount)
     
+            #Finds the reward of the next state by allowing stockfish to pick a move then removing it before next turn
             board = board.mirror()
             possible_moves = get_legal_moves(board.legal_moves)
             p1Move = player1.choose_move(board, possible_moves)
@@ -161,6 +167,7 @@ def play(player1: Player, player2: Player):
                     if (value > tempHigh):
                         futureValue = value
             
+            #Updates the qTable reward
             newValue = moveDict[p2Move] + 0.7 * (scorePoints + 0.99 * futureValue - moveDict[p2Move])
             qTable[currentState][p2Move] = newValue
             
@@ -175,12 +182,13 @@ def play(player1: Player, player2: Player):
 
         board = board.mirror()
 
-    gec = get_game_ending_condition(board)
+    gec = get_game_ending_condition(board, gameCount)
+    gameCount += 1
     return board
     # do something with game ending condition. ( reward winner/ adjust probability etc )
 
 
-def get_game_ending_condition(board):
+def get_game_ending_condition(board, gameCount):
     gec = ""
     if board.is_checkmate():
         if board.turn:
@@ -225,7 +233,7 @@ def get_legal_moves(legal_moves):
         moves.append(move)
     return moves
 
-def score(beforeBoard, afterBoard):
+def score(beforeBoard, afterBoard, gameCount):
     beforeBoardDict = beforeBoard.piece_map()
     afterBoardDict = afterBoard.piece_map()
     whiteBeforePoints = 0
@@ -255,37 +263,33 @@ def score(beforeBoard, afterBoard):
         scorePoints = (blackAfterPoints - blackBeforePoints) + (whiteBeforePoints - whiteAfterPoints)
     return scorePoints
 
-# def run():
-#     if (gameCount < totalGames / 2):
-#         p1 = Player()
-#         p2 = Player("stockfish")
-#     else:
-#         p1 = Player("stockfish")
-#         p2 = Player()
-#     play(p1, p2)
- 
-# gecList = [0, 0, 0, 0, 0, 0]
-# turnList = []
-# gameCount = 0
-# while (gameCount < totalGames):
-#     run()
-#     gameCount += 1
- 
- 
-# moveCount = 0 
-# for number in turnList:
-#         moveCount += number
-# print("Move Count:" + str(moveCount))
-# print("Turn List: " + str(turnList))  
-# turnList.sort()
-# print("Sorted Turn List: " + str(turnList))
-# print("QTable Size:" + str(len(qTable)))
-# print("[Stockfish wins, AI wins, stalemate, insufficient pieces to end the game, five fold repetition draw, 75 move rule draw]")
-# print(str(gecList))
-
-with open('qTable.txt', 'a') as the_file:
-    for key, values in qTable.items():
-        the_file.write(str(key) + ',')
-        for key2 in values:
-            the_file.write(str(key2) + ',' + str(values[key2]) + ',')
-        the_file.write('\n')
+def train():
+    gameCount = 0
+    while (gameCount < totalGames):
+        if (gameCount < totalGames / 2):
+            p1 = Player()
+            p2 = Player("stockfish")
+        else:
+            p1 = Player("stockfish")
+            p2 = Player()
+        playRound(p1, p2, gameCount)
+        gameCount += 1
+     
+     
+    moveCount = 0 
+    for number in turnList:
+            moveCount += number
+    print("Move Count:" + str(moveCount))
+    print("Turn List: " + str(turnList))  
+    turnList.sort()
+    print("Sorted Turn List: " + str(turnList))
+    print("QTable Size:" + str(len(qTable)))
+    print("[Stockfish wins, AI wins, stalemate, insufficient pieces to end the game, five fold repetition draw, 75 move rule draw]")
+    print(str(gecList))
+    
+    with open('qTable.txt', 'a') as the_file:
+        for key, values in qTable.items():
+            the_file.write(str(key) + ',')
+            for key2 in values:
+                the_file.write(str(key2) + ',' + str(values[key2]) + ',')
+            the_file.write('\n')
