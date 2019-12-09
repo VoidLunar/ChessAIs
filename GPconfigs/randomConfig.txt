@@ -19,13 +19,8 @@
 			"mode":"e",
 			"n":"2000"
 		},
-	"penaltyCoefficient":".1",
-	"pillDensity":".5",
-	"fruitSpawnChance":"1",
-	"fruitScore":10,
-	"timeMultiplier":3,
 	"randomSeed":"",
-	"logFilePath":"./logs/randomlog.txt",
-	"solutionFilePath":"./solutions/randomsolution.txt",
+	"logFilePath":"./GPlogs/randomlog.txt",
+	"solutionFilePath":"./GPsolutions/randomsolution.txt",
 	"maxTreeDepth":3
 }

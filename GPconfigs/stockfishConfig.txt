@@ -19,13 +19,8 @@
 			"mode":"e",
 			"n":"2000"
 		},
-	"penaltyCoefficient":".1",
-	"pillDensity":".5",
-	"fruitSpawnChance":"1",
-	"fruitScore":10,
-	"timeMultiplier":3,
 	"randomSeed":"",
-	"logFilePath":"./logs/stockfishlog.txt",
-	"solutionFilePath":"./solutions/stockfishsolution.txt",
+	"logFilePath":"./GPlogs/stockfishlog.txt",
+	"solutionFilePath":"./GPsolutions/stockfishsolution.txt",
 	"maxTreeDepth":3
 }

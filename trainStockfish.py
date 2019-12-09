@@ -1,4 +1,4 @@
 from chessGP import run
 
 def train():
-    run('./configs/stockfishConfig.txt')
+    run('./GPconfigs/stockfishConfig.txt')

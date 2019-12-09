@@ -1,4 +1,4 @@
 from chessGP import run
 
 def train():
-    run('./configs/randomConfig.txt')
+    run('./GPconfigs/randomConfig.txt')
